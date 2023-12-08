@@ -18,10 +18,10 @@ Available Commands:
 4. !N - Execute command with id N
 5. exit, quit or q - Exit the application
 6. help - brings up this help screen
-=======================================
+
 Creator Information:
 - Created by Ali Fadhil
 - B00837578
 - al878898@dal.ca
-=======================================
+
 

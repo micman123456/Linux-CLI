@@ -10,11 +10,12 @@ gcc -o Linux-CLI Linux-CLI.c
 
 Available Commands:
 1. Most built in Unix commands - cal, ls, top etc...
-2. history - Display command history and PID
-3. !! - Execute most recent command
-4. !N - Execute command with id N
-5. exit, quit or q - Exit the application
-6. help - brings up this help screen
+2. cd - change working directory
+3. history - Display command history and PID
+4. !! - Execute most recent command
+5. !N - Execute command with id N
+6. exit, quit or q - Exit the application
+7. help - brings up this help screen
 =======================================
 Creator Information:
 - Created by Ali Fadhil

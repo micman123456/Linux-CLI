@@ -18,6 +18,7 @@
 
 */
 
+
 int count_lines(FILE* file)
 {
     char buf[BUF_SIZE];
@@ -75,10 +76,11 @@ void displayHelp() {
     printf("=======================================\n");
     printf("Available Commands:\n");
     printf("1. Most built in Unix commands - cal, ls, top etc...\n");
-    printf("2. history - Display command history and PID\n");
-    printf("3. !! - Execute most recent command\n");
-    printf("4. !N - Execute command with id N\n");
-    printf("5. exit, quit or q - Exit the application\n");
+    printf("2. cd, to change working directory\n");
+    printf("3. history - Display command history and PID\n");
+    printf("4. !! - Execute most recent command\n");
+    printf("5. !N - Execute command with id N\n");
+    printf("6. exit, quit or q - Exit the application\n");
     printf("=======================================\n");
     printf("Creator Information:\n");
     printf("- Created by Ali Fadhil\n");
@@ -252,12 +254,22 @@ int main() {
     int history_flag;
     uid_t uid = getuid();      
     struct passwd *pw = getpwuid(uid);
+    char curdir[MAX_LINE];
+    char *homeDir = getenv("HOME");
+    char filepath[1024];
 
+    if (homeDir == NULL) {
+	    fprintf(stderr, "HOME environment variable not set.\n");
+	    return 0;
+    }	    
 
     /*-- Program starts --*/
 
     while(should_run){
-	    
+	
+	
+	snprintf(filepath, sizeof(filepath), "%s/%s", homeDir, filename);
+
         /*-- Reset index, size, word count & user input string upon each iteration --*/
         history_flag = 0;
         index = 0;
@@ -268,9 +280,13 @@ int main() {
         for (int i = 0; i < MAX_LINE; i++) {
             command[i] = (char *)malloc(MAX_LINE * sizeof(char));
         }
-	    
-        /*-- Print CSCI3120> --*/
-        printf("%s>",pw->pw_name); 
+	
+	if (getcwd(curdir, sizeof curdir)) {
+	            /* current directory might be unreachable: not an error */
+	        //*curdir = '\0';
+		printf("%s:%s>",pw->pw_name,curdir); 
+	}
+
 
     /*-- Capture the user input, word by word and store in args --*/
     while ((ch = getchar())) {
@@ -307,25 +323,42 @@ int main() {
     /* Check for exit input */
     if (strcmp(args[0],"exit")==0 || strcmp(args[0],"quit")==0 || strcmp(args[0],"q")==0){ 
 	    printf("Exiting...\n");
-        FILE *clearFile = fopen(filename, "w");
+      	/*	
+	    FILE *clearFile = fopen(filepath, "w");
 	    if (clearFile == NULL) {
 		    perror("Error clearing file");
 		    return 1;
 	    }
-	    fclose(clearFile);
+	    fclose(clearFile); */
 	    return 0;
     } 
     else if (strcmp(args[0],"history")==0){
-    	displayFile(filename); 
+    	displayFile(filepath); 
     }
     else if (strcmp(args[0],"help") == 0){
         displayHelp();
+    }
+    else if (strcmp(args[0], "cd") == 0){  
+		
+	    if (args[1]){
+	    	if (args[1][0] == '~'){
+			args[1] = homeDir;
+		}
+	    }
+
+
+	    if (chdir(args[1]) == 0) {
+	    // changed dir's 
+	    }
+	    else{
+		    printf("cd error: %s no such file or directory\n",args[1]);
+	    }
     }
     
 
     
     else { 
-	    FILE *file = fopen(filename, "a"); 
+	    FILE *file = fopen(filepath, "a"); 
 	    if (file == NULL) { 
 		    printf("Failed to open the file\n");
 		    return 1; }
@@ -359,7 +392,7 @@ int main() {
               
         }
 
-        command = fetchCommand(filename,historyIndex); 
+        command = fetchCommand(filepath,historyIndex); 
         
 	    if(command){
             if (execvp(command[0],command) == -1){
